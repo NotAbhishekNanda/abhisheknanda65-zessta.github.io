@@ -1,48 +1,19 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      p {
-        text-align: center;
-        font-size: 60px;
-        margin-top: 0px;
-      }
-    </style>
-  </head>
-  <body>
-    <p id="demo"></p>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Countdown</title>
+  <link rel="stylesheet" href="./style.css">
 
-    <script>
-      // Set the date we're counting down to
-      let countDownDate = new Date('Aug 5, 2022 07:30:00').getTime();
+</head>
+<body>
+<div class="countdown" data-date="05-8-2022" data-time="07:30">
+  <div class="day"><span class="num"></span><span class="word"></span></div>
+  <div class="hour"><span class="num"></span><span class="word"></span></div>
+  <div class="min"><span class="num"></span><span class="word"></span></div>
+  <div class="sec"><span class="num"></span><span class="word"></span></div>
+</div>
+  <script  src="./script.js"></script>
 
-      // Update the count down every 1 second
-      let x = setInterval(function () {
-        // Get today's date and time
-        let now = new Date().getTime();
-
-        // Find the distance between now and the count down date
-        let distance = countDownDate - now;
-
-        // Time calculations for days, hours, minutes and seconds
-        let days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        let hours = Math.floor(
-          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        // Output the result in an element with id="demo"
-        document.getElementById('demo').innerHTML =
-          days + 'd ' + hours + 'h ' + minutes + 'm ' + seconds + 's ';
-
-        // If the count down is over, write some text
-        if (distance < 0) {
-          clearInterval(x);
-          document.getElementById('demo').innerHTML = 'SEE, HOW BEAUTIFUL WE ARE TOGETHER !!!';
-        }
-      }, 1000);
-    </script>
-  </body>
+</body>
 </html>
