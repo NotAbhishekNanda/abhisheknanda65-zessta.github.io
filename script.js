@@ -1,73 +1,195 @@
-const $ = elem => document.querySelector(elem);
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-const countdown = function(_config) {
-  const tarDate = $(_config.target).getAttribute('data-date').split('-');
-  const day = parseInt(tarDate[0]);
-  const month = parseInt(tarDate[1]);
-  const year = parseInt(tarDate[2]);
-  let tarTime = $(_config.target).getAttribute('data-time');
-  let tarhour, tarmin;
-  
-  if (tarTime != null) {    
-    tarTime = tarTime.split(':');
-    tarhour = parseInt(tarTime[0]);
-    tarmin = parseInt(tarTime[1]);
-  }
+const notes = [
+{ f: 262, d: .5, t: "Hap", p: p1 },
+{ f: 262, d: .5, t: "py&nbsp;", p: p1 },
+{ f: 294, d: 1, t: "Birth", p: p1 },
+{ f: 262, d: 1, t: "day&nbsp;", p: p1 },
+{ f: 349, d: 1, t: "To&nbsp;", p: p1 },
+{ f: 330, d: 2, t: "You", p: p1 },
 
-  let months = [31, new Date().getFullYear() % 4 == 0 ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  let dateNow = new Date();
-  let dayNow = dateNow.getDate();
-  let monthNow = dateNow.getMonth() + 1;
-  let yearNow = dateNow.getFullYear();
-  let hourNow = dateNow.getHours();
-  let minNow = dateNow.getMinutes();
-  let count_day = 0, count_hour = 0, count_min = 0;
-  let count_day_isSet = false;
-  let isOver = false;
-  
-  // Set the date we're counting down to
-  const countDownDate = new Date(year, month-1, day, tarhour, tarmin, 0, 0).getTime();
+{ f: 262, d: .5, t: "Hap", p: p2 },
+{ f: 262, d: .5, t: "py&nbsp;", p: p2 },
+{ f: 294, d: 1, t: "Birth", p: p2 },
+{ f: 262, d: 1, t: "day&nbsp;", p: p2 },
+{ f: 392, d: 1, t: "To&nbsp;", p: p2 },
+{ f: 349, d: 2, t: "You", p: p2 },
 
-  $(_config.target+' .day .word').innerHTML = _config.dayWord;
-  $(_config.target+' .hour .word').innerHTML = _config.hourWord;
-  $(_config.target+' .min .word').innerHTML = _config.minWord;
-  $(_config.target+' .sec .word').innerHTML = _config.secWord; 
-  
-  const updateTime = () => {
-    // Get todays date and time
-    const now = new Date().getTime();
+{ f: 262, d: .5, t: "Hap", p: p3 },
+{ f: 262, d: .5, t: "py&nbsp;", p: p3 },
+{ f: 523, d: 1, t: "Birth", p: p3 },
+{ f: 440, d: 1, t: "day&nbsp;", p: p3 },
+{ f: 349, d: 1, t: "Dear&nbsp;", p: p3 },
+{ f: 330, d: 1, t: "Gee", p: p3 },
+{ f: 294, d: 3, t: "tha", p: p3 },
 
-    // Find the distance between now an the count down date
-    const distance = countDownDate - now;
+{ f: 466, d: .5, t: "Hap", p: p4 },
+{ f: 466, d: .5, t: "py&nbsp;", p: p4 },
+{ f: 440, d: 1, t: "Birth", p: p4 },
+{ f: 349, d: 1, t: "day&nbsp;", p: p4 },
+{ f: 392, d: 1, t: "To&nbsp;", p: p4 },
+{ f: 349, d: 2, t: "You", p: p4 }];
 
-    // Time calculations for days, hours, minutes and seconds
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-    // If the count down is over, write some text 
-    if (distance < 0) {
-      $(".countdown").innerHTML = "<h1>SEE, HOW BEAUTIFUL WE ARE TOGETHER !!!</h1>";
-    } else {
-      requestAnimationFrame(updateTime);
+//DOM
+notes.map(n => createSpan(n));
 
-      $(_config.target+' .day .num').innerHTML = addZero(days);
-      $(_config.target+' .hour .num').innerHTML = addZero(hours);
-      $(_config.target+' .min .num').innerHTML = addZero(minutes);
-      $(_config.target+' .sec .num').innerHTML = addZero(seconds);
-    }
-  }
-  
-  updateTime();
+function createSpan(n) {
+  n.sp = document.createElement("span");
+  n.sp.innerHTML = n.t;
+  n.p.appendChild(n.sp);
 }
 
-const addZero = (x) => (x < 10 && x >= 0) ? "0"+x : x;
+// SOUND
+let speed = inputSpeed.value;
+let flag = false;
+let sounds = [];
 
-const mylittlething_countdown = new countdown({
-  target: '.countdown',
-  dayWord: ' days',
-  hourWord: ' hours',
-  minWord: ' mins',
-  secWord: ' secs'
-});
+class Sound {
+  constructor(freq, dur, i) {
+    this.stop = true;
+    this.frequency = freq; // la frecuencia
+    this.waveform = "triangle"; // la forma de onda
+    this.dur = dur; // la duración en segundos
+    this.speed = this.dur * speed;
+    this.initialGain = .15;
+    this.index = i;
+    this.sp = notes[i].sp;
+  }
+
+  cease() {
+    this.stop = true;
+    this.sp.classList.remove("jump");
+    //this.sp.style.animationDuration = `${this.speed}s`;
+    if (this.index < sounds.length - 1) {sounds[this.index + 1].play();}
+    if (this.index == sounds.length - 1) {flag = false;}
+  }
+
+  play() {
+    this.oscillator = audioCtx.createOscillator();
+    this.gain = audioCtx.createGain();
+    this.gain.gain.value = this.initialGain;
+    this.oscillator.type = this.waveform;
+    this.oscillator.frequency.value = this.frequency;    
+    this.gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + this.speed);
+    this.oscillator.connect(this.gain);
+    this.gain.connect(audioCtx.destination);
+    this.oscillator.start(audioCtx.currentTime);
+    this.sp.setAttribute("class", "jump");
+    this.stop = false;
+    this.oscillator.stop(audioCtx.currentTime + this.speed);
+    this.oscillator.onended = () => {this.cease();};
+  }}
+
+
+for (let i = 0; i < notes.length; i++) {
+  let sound = new Sound(notes[i].f, notes[i].d, i);
+  sounds.push(sound);
+}
+
+
+// EVENTS
+wishes.addEventListener("click", function (e) {
+  if (e.target.id != "inputSpeed" && !flag) {
+    sounds[0].play();
+    flag = true;}
+}, false);
+
+
+inputSpeed.addEventListener("input", function (e) {
+  speed = this.value;
+  sounds.map(s => {
+    s.speed = s.dur * speed;
+  });
+}, false);
+
+// CANVAS
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+let cw = canvas.width = window.innerWidth,
+cx = cw / 2;
+let ch = canvas.height = window.innerHeight,
+cy = ch / 2;
+
+let requestId = null;
+
+const colors = ["#93DFB8", "#FFC8BA", "#E3AAD6", "#B5D8EB", "#FFBDD8"];
+
+class Particle {
+  constructor() {
+    this.x = Math.random() * cw;
+    this.y = Math.random() * ch;
+    this.r = 15 + ~~(Math.random() * 20); //radius of the circumcircle
+    this.l = 3 + ~~(Math.random() * 2); //polygon sides
+    this.a = 2 * Math.PI / this.l; // angle between polygon vertices
+    this.rot = Math.random() * Math.PI; // polygon rotation
+    this.speed = .05 + Math.random() / 2;
+    this.rotSpeed = 0.005 + Math.random() * .005;
+    this.color = colors[~~(Math.random() * colors.length)];
+  }
+  update() {
+    if (this.y < -this.r) {
+      this.y = ch + this.r;
+      this.x = Math.random() * cw;
+    }
+    this.y -= this.speed;
+  }
+  draw() {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.rot);
+    ctx.beginPath();
+    for (let i = 0; i < this.l; i++) {
+      let x = this.r * Math.cos(this.a * i);
+      let y = this.r * Math.sin(this.a * i);
+      ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = this.color;
+    ctx.stroke();
+
+    ctx.restore();
+  }}
+
+
+
+let particles = [];
+for (let i = 0; i < 20; i++) {
+  let p = new Particle();
+  particles.push(p);
+}
+
+
+
+function Draw() {
+  requestId = window.requestAnimationFrame(Draw);
+  //ctx.globalAlpha=0.65;
+  ctx.clearRect(0, 0, cw, ch);
+  particles.map(p => {
+    p.rot += p.rotSpeed;
+    p.update();
+    p.draw();
+  });
+
+}
+
+
+function Init() {
+  if (requestId) {
+    window.cancelAnimationFrame(requestId);
+    requestId = null;
+  }
+
+
+  cw = canvas.width = window.innerWidth, cx = cw / 2;
+  ch = canvas.height = window.innerHeight, cy = ch / 2;
+
+  //particles.map((p) => p.update());
+  Draw();
+};
+
+setTimeout(function () {
+  Init();
+  window.addEventListener('resize', Init, false);
+}, 15);

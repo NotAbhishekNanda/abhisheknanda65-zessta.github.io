@@ -1,0 +1,48 @@
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0);
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: row;
+  height: 100vh;
+  font-family: Futura, Futura;
+  background-color: rgba(0, 0, 0, 0);
+  margin: 0;
+}
+
+h1 {
+  font-size: 10vw;
+}
+
+.countdown {
+  display: flex;
+}
+.countdown span, .countdown h1 {
+  color: #000000;
+}
+.countdown .day, .countdown .hour, .countdown .min, .countdown .sec {
+  padding: 1vw 3vw;
+  text-align: center;
+}
+.countdown .day .num, .countdown .hour .num, .countdown .min .num, .countdown .sec .num {
+  display: block;
+  font-size: 8vw;
+  line-height: 1em;
+}
+.countdown .day .word, .countdown .hour .word, .countdown .min .word, .countdown .sec .word {
+  display: block;
+  font-size: 2vw;
+  color: #000000;
+}
+
